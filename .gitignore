@@ -1,0 +1,34 @@
+
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Arquivos temporários do Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Dados pessoais e imagens cadastradas
+dataset/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.webp
+
+# Modelos e dados gerados localmente
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+
+# Configurações e segredos
+.env
+.streamlit/secrets.toml
+
+# Arquivos do sistema e editor
+.DS_Store
+Thumbs.db
+.vscode/
