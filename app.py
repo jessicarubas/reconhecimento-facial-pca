@@ -6,7 +6,11 @@ import streamlit as st
 
 from processamento import processar_imagem
 from reconhecimento import ReconhecedorFacial
-from webcam import capturar_rosto_webcam
+from webcam import (
+	carregar_detector_facial,
+	localizar_rosto,
+	recortar_rosto,
+)
 
 
 def inicializar_estado():
@@ -170,22 +174,25 @@ def main():
 				)
 
 	st.header("4. Reconhecimento pela webcam")
-	st.caption("Na janela da câmera, pressione c para capturar o rosto ou q/Esc para encerrar.")
-	if st.button("Capturar e reconhecer pela webcam", key="reconhecimento_webcam"):
+	foto_webcam = st.camera_input("Posicione o rosto e clique para capturar")
+
+	if foto_webcam is not None:
 		reconhecedor = st.session_state.reconhecedor
 		if reconhecedor is None:
 			st.warning("Treine o reconhecedor antes de usar a webcam.")
 		else:
 			try:
-				rosto = capturar_rosto_webcam()
-				if rosto is None:
-					st.info("Captura encerrada sem fotografar um rosto.")
+				imagem = decodificar_upload(foto_webcam)
+				detector = carregar_detector_facial()
+				caixa = localizar_rosto(imagem, detector)
+				if caixa is None:
+					st.error("Nenhum rosto foi detectado. Limpe a foto e tente novamente.")
 				else:
+					rosto = recortar_rosto(imagem, caixa)
 					pessoa, distancia = reconhecer_imagem(rosto, reconhecedor)
 					st.image(
 						cv2.cvtColor(rosto, cv2.COLOR_BGR2RGB),
 						caption="Recorte facial analisado",
-						alt="Recorte do rosto capturado pela webcam",
 					)
 					st.subheader("Pessoa cadastrada mais próxima")
 					st.write(f"**Nome:** {pessoa}")
@@ -196,7 +203,6 @@ def main():
 					)
 			except (ValueError, RuntimeError, cv2.error) as erro:
 				st.error(f"Não foi possível capturar ou reconhecer o rosto: {erro}")
-
 
 if __name__ == "__main__":
 	main()
